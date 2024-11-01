@@ -1,0 +1,26 @@
+GET http://localhost:3002/api/notes
+
+###
+GET http://localhost:3001/api/notes/66eda245e87e2b67d30a9c6f
+
+###
+POST http://localhost:3001/api/notes
+Content-Type: application/json
+
+{
+    "content": "TDD is very popular",
+    "important": true,
+    "user_id": "6709036315d6dc397832606c"
+}
+
+###
+PUT http://localhost:3001/api/notes/66eda245e87e2b67d30a9c6f
+Content-Type: application/json
+
+{
+    "content": "VSCODE is a great text editor",
+    "important": false
+}
+
+###
+DELETE http://localhost:3001/api/notes/66fe90f1156ce23e1075daab
