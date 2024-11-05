@@ -5,14 +5,14 @@ on:
         branches:
             - main
         paths:
-            - "infra/hub/**"
-            - ".github/workflows/terraform.hub/.yaml"
+            - 'infra/hub/**''
+            - '.github/workflows/terraform.hub.yaml'
     pull_request:
         branches:
             - main
         paths:
-            - "infra/hub/**"
-            - ".github/workflows/terraform.hub/.yaml"
+            - 'infra/hub/**'
+            - '.github/workflows/terraform.hub.yaml'
 
 jobs:
     tfplan:
