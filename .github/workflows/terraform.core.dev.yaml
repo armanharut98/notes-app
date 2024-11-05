@@ -1,0 +1,122 @@
+name: Core Infrastructure Plan and Apply
+
+on:
+    push:
+        branches:
+            - dev
+        paths:
+            - 'infra/core/**'
+            - '.github/workflows/terraform.core.dev.yaml'
+    pull_request:
+        branches:
+            - dev
+        paths:
+            - 'infra/core/**'
+            - '.github/workflows/terraform.core.dev.yaml'
+
+jobs:
+    tfplan:
+        runs-on: ubuntu-latest
+        permissions:
+            id-token: write
+            contents: read
+        steps:
+            - name: Code checkout
+              uses: actions/checkout@v3 
+
+            - name: Configure AWS credentials
+              uses: aws-actions/configure-aws-credentials@v3
+              with:
+                role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/${{ secrets.AWS_ROLE_TO_ASSUME }}
+                aws-region: ${{ vars.AWS_REGION }}
+                role-session-name: GitHubActionsTerraformSession
+
+            - name: Setup Terraform
+              uses: hashicorp/setup-terraform@v3
+              with:
+                terraform_version: 1.9.7
+
+            - name: Setup Workspace Name
+              run: |
+                if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+                    echo "TERRAFORM_WORKSPACE=${{ github.base_ref }}" >> $GITHUB_ENV
+                else
+                    echo "TERRAFORM_WORKSPACE=${GITHUB_REF##*/}" >> $GITHUB_ENV
+                fi
+            
+            - name: Terraform Init
+              run: terraform init
+              working-directory: ./infra/core
+
+
+            - name: Verify and Prepare Terraform Workspace
+              working-directory: ./infra/core
+              run: |
+                echo "Current TERRAFORM_WORKSPACE: ${TERRAFORM_WORKSPACE}"
+
+                if terraform workspace list 2>&1 | grep -q "$TERRAFORM_WORKSPACE"; then
+                    echo "Workspace $TERRAFORM_WORKSPACE exists. It will be used automatically."
+                    terraform workspace select $TERRAFORM_WORKSPACE
+                else 
+                    echo "Workspace $TERRAFORM_WORKSPACE does not exist. Creating it..."
+                    terraform workspace new $TERRAFORM_WORKSPACE
+                fi
+
+            - name: Terraform Format Check
+              run: terraform fmt -check
+              working-directory: ./infra/core
+
+            - name: Terraform Plan
+              run: terraform plan -out=tfplan
+              working-directory: ./infra/core
+            
+            - name: Upload Terraform plan
+              uses: actions/upload-artifact@v3
+              with:
+                name: tfplan
+                path: ./infra/core/tfplan
+              
+    tfapply:
+        needs: tfplan
+        runs-on: ubuntu-latest
+        permissions:
+            id-token: write
+            contents: read
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v3
+
+            - name: Configure AWS credentials
+              uses: aws-actions/configure-aws-credentials@v3
+              with:
+                role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/${{ secrets.AWS_ROLE_TO_ASSUME }}
+                aws-region: ${{ vars.AWS_REGION }}
+                role-session-name: GitHubActionsTerraformSession
+
+            - name: Setup Terraform
+              uses: hashicorp/setup-terraform@v3
+              with:
+                terraform_version: 1.9.7
+
+            - name: Set Workspace Name
+              run: echo "TERRAFORM_WORKSPACE=${GITHUB_REF##*/}" >> $GITHUB_ENV
+
+            - name: Terraform Init
+              run: terraform init
+              working-directory: ./infra/core
+
+            - name: Select Terraform Workspace
+              run: terraform workspace select $TERRAFORM_WORKSPACE
+              working-directory: ./infra/core
+
+            - name: Download Terraform plan
+              uses: actions/download-artifact@v3
+              with:
+                name: tfplan
+                path: ./infra/core
+
+            - name: Terraform Apply
+              run: terraform apply -auto-approve tfplan
+              working-directory: ./infra/core
