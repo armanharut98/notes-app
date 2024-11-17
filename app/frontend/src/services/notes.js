@@ -1,6 +1,6 @@
-import axios from 'axios'
+import axios from "axios"
 
-const baseUrl = '/api/notes'
+const baseUrl = "/api/notes"
 let token = null
 
 const setToken = newToken => {

@@ -1,0 +1,96 @@
+name: Application Build and Deploy
+
+on:
+  push:
+    branches:
+      - dev
+    paths:
+      - 'app/**'
+      - '.github/workflows/app.dev.yaml'
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+    outputs:
+      branch_name: ${{ env.BRANCH_NAME }}
+    steps:
+        - name: Checkout code
+          uses: actions/checkout@v3
+
+        - name: Configure AWS credentials
+          uses: aws-actions/configure-aws-credentials@v3
+          with:
+            role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/${{ secrets.AWS_ROLE_TO_ASSUME }}
+            aws-region: ${{ vars.AWS_REGION }}
+            role-session-name: GithubActionsECRPushSession
+
+        - name: Get branch name
+          id : branch-name
+          run: |
+            if [[ $GITHUB_BASE_REF ]]; then
+                echo "BRANCH_NAME=$GITHUB_BASE_REF" >> $GITHUB_ENV
+            else
+                echo "BRANCH_NAME=${GITHUB_REF#refs/heads/}" >> $GITHUB_ENV
+            fi
+
+        - name: Login to ECR
+          id: login-ecr
+          uses: aws-actions/amazon-ecr-login@v1
+
+        - name: Build, tag, and push image to Amazon ECR
+          working-directory: /app
+          env:
+            ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+            ECR_REPOSITORY: ${{ env.BRANCH_NAME }}-notes-app-repo
+            IMAGE_TAG: ${{ env.BRANCH_NAME }}-${{ github.sha }}
+          run: |
+            docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
+            docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+
+        - name: Tag image as latest for dev branch
+          working-directory: /app
+          env:
+            ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+            ECR_REPOSITORY: ${{ env.BRANCH_NAME }}-backend-repo
+            IMAGE_TAG: ${{ env.BRANCH_NAME }}-${{ github.sha }}
+          run: |
+            docker tag $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG $ECR_REGISTRY/$ECR_REPOSITORY:latest
+            docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest
+
+  deploy:
+    needs: build-and-push
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+    env:
+      BRANCH_NAME: ${{ needs.build-and-push.outputs.branch_name }}
+    steps:
+        - name: Configure AWS credentials
+          uses: aws-actions/configure-aws-credentials@v3
+          with:
+            role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/${{ secrets.AWS_ROLE_TO_ASSUME }}
+            aws-region: ${{ vars.AWS_REGION }}
+            role-session-name: GithubActionsECRPushSession
+
+        - name: Download migration task definition
+          run: aws ecs describe-task-definition --task-definition ${{ env.BRANCH_NAME }}-app --query taskDefinition > task-definition.json
+        
+        - name: Update task definition with new image
+          id: download-taskdef
+          uses: aws-actions/amazon-ecs-render-task-definition@v1
+          with:
+            task-definition: "task-definition.json"
+            container-name: notes-app
+            image: ${{ steps.login-ecr.outputs.registry }}/${{ env.BRANCH_NAME }}-app-repo:${{ env.BRANCH_NAME }}-${{ github.sha }}
+          
+        - name: Deploy to ECS
+          uses: aws-action/amazon-ecs-deploy-task-definition@v1
+          with:
+            task-definition: ${{ steps.download-taskdef.outputs.task-definition }}
+            service: ${{ env.BRANCH_NAME }}-app
+            cluster: ${{ env.BRANCH_NAME }}-cluster
+            wait-for-service-stability: true

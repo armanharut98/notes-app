@@ -4,12 +4,13 @@ module "core_infra_parameters" {
 }
 
 data "aws_region" "current" {}
+data "aws_caller_identity" "current" {}
 
 locals {
   project_name = "core_infra"
   az_suffix    = ["a", "b", "c", "d", "e", "f"]
 
-  core_name_prefix = "${terraform.workspace}.core"
+  core_name_prefix = "${terraform.workspace}-core"
   core_az_count    = module.core_infra_parameters.map["/core/az_count"]
   core_vpc_cidr    = module.core_infra_parameters.map["/core/vpc_cidr"]
   core_region      = data.aws_region.current.name
