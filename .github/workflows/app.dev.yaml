@@ -54,7 +54,7 @@ jobs:
           working-directory: ./app
           env:
             ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-            ECR_REPOSITORY: ${{ env.BRANCH_NAME }}-backend-repo
+            ECR_REPOSITORY: ${{ env.BRANCH_NAME }}-app-repo
             IMAGE_TAG: ${{ env.BRANCH_NAME }}-${{ github.sha }}
           run: |
             docker tag $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG $ECR_REGISTRY/$ECR_REPOSITORY:latest
