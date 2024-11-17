@@ -8,6 +8,7 @@ resource "aws_ecs_task_definition" "app" {
     {
       name      = "notes-app"
       essential = true
+      image     = "${aws_ecr_repository.app.repository_url}:latest"
       portMappings = [
         {
           contaierPort = 3001
