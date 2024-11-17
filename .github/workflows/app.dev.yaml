@@ -41,7 +41,7 @@ jobs:
           uses: aws-actions/amazon-ecr-login@v1
 
         - name: Build, tag, and push image to Amazon ECR
-          working-directory: /app
+          working-directory: ./app
           env:
             ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
             ECR_REPOSITORY: ${{ env.BRANCH_NAME }}-notes-app-repo
@@ -51,7 +51,7 @@ jobs:
             docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
 
         - name: Tag image as latest for dev branch
-          working-directory: /app
+          working-directory: ./app
           env:
             ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
             ECR_REPOSITORY: ${{ env.BRANCH_NAME }}-backend-repo
