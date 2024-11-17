@@ -16,4 +16,6 @@ RUN npm install
 
 RUN npm run build:ui
 
+EXPOSE 3001
+
 CMD [ "npm", "start" ]
