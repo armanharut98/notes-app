@@ -11,7 +11,7 @@ resource "aws_subnet" "core_public" {
   cidr_block        = cidrsubnet(aws_vpc.core.cidr_block, 8, count.index)
   availability_zone = "${local.core_region}${local.az_suffix[count.index]}"
   tags = {
-    Name = "${terraform.workspace}-subnet-private-${local.az_suffix[count.index]}"
+    Name = "${terraform.workspace}-subnet-public-${local.az_suffix[count.index]}"
   }
 }
 
@@ -21,7 +21,7 @@ resource "aws_subnet" "core_private" {
   cidr_block        = cidrsubnet(aws_vpc.core.cidr_block, 8, 10 + count.index)
   availability_zone = "${local.core_region}${local.az_suffix[count.index]}"
   tags = {
-    Name = "${terraform.workspace}-subnet-public-${local.az_suffix[count.index]}"
+    Name = "${terraform.workspace}-subnet-private-${local.az_suffix[count.index]}"
   }
 }
 
