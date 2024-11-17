@@ -5,9 +5,9 @@ resource "aws_instance" "runner" {
   subnet_id              = aws_subnet.hub[0].id
   vpc_security_group_ids = [aws_security_group.github_runner_sg.id]
   user_data = base64encode(templatefile("${path.module}/scripts/github_runner_setup.sh", {
-    github_token = local.github_token,
-    runner_label = local.runner_label,
-    repo_url     = local.repo_url
+    github_token = locals.github_token,
+    runner_label = locals.runner_label,
+    repo_url     = locals.repo_url
   }))
   user_data_replace_on_change = true
   associate_public_ip_address = true
@@ -48,7 +48,7 @@ resource "aws_security_group" "github_runner_sg" {
 }
 
 resource "aws_iam_role" "runner_role" {
-  name = local.ec2_runner_iam_role
+  name = locals.ec2_runner_iam_role
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
@@ -63,7 +63,7 @@ resource "aws_iam_role" "runner_role" {
             "token.actions.githubusercontent.com:aud" = "sts.amazonaws.com"
           }
           StringLike = {
-            "token.actions.githubusercontent.com:sub" = "repo:${local.github_org}/${local.github_repo_name}:*"
+            "token.actions.githubusercontent.com:sub" = "repo:${locals.github_org}/${locals.github_repo_name}:*"
           }
         }
       }
