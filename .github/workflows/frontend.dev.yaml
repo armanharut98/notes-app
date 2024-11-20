@@ -1,4 +1,4 @@
-name: Application Backend Build and Deploy
+name: Application Frontend Build and Deploy
 
 on:
     push:
