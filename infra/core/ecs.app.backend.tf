@@ -1,9 +1,10 @@
 resource "aws_ecs_task_definition" "app" {
   family                   = "app"
-  cpu                      = 512
+  cpu                      = 256
   memory                   = 512
   network_mode             = "awsvpc"
   requires_compatibilities = ["FARGATE"]
+  execution_role_arn       = aws_iam_role.ecs_task_execution.arn
   container_definitions = jsonencode([
     {
       name      = "notes-app"
@@ -11,8 +12,8 @@ resource "aws_ecs_task_definition" "app" {
       image     = "${aws_ecr_repository.app.repository_url}:latest"
       portMappings = [
         {
-          contaierPort = 3001
-          protocol     = "tcp"
+          containerPort = 3001
+          protocol      = "tcp"
         }
       ]
       logConfiguration = {
@@ -23,16 +24,6 @@ resource "aws_ecs_task_definition" "app" {
           awslogs-stream-prefix = "notes-app"
         }
       }
-      secrets = [
-        {
-          name      = "MONGODB_URI"
-          valueFrom = "arn:aws:secretsmanager:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:secret:notes-app/db_uri-6vWTjW"
-        },
-        {
-          name      = "SEKRET"
-          valueFrom = "arn:aws:secretsmanager:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:secret:notes-app/encryption-secret-L1Zccc"
-        }
-      ]
     }
   ])
 }
