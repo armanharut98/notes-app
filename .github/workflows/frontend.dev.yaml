@@ -44,6 +44,7 @@ jobs:
                 npm run build
 
             - name: Deploy to S3
+              working-directory: ./app/frontend
               run: |
                 aws s3 sync dist/ s3://${{ vars.S3_BUCKET_NAME }} \
                     --delete \
