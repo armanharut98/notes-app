@@ -115,7 +115,11 @@ const App = () => {
                 </button>
             </div>
             <ul>
-                {notesToShow.map(note => <Note key={note.id} note={note} toggleImportance={() => toggleImportance(note)} />)}
+                {
+                    notesToShow.length > 0
+                        ? notesToShow.map(note => <Note key={note.id} note={note} toggleImportance={() => toggleImportance(note)} />)
+                        : null
+                }
             </ul>
             <Footer />
         </div>
