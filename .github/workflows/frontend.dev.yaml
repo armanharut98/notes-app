@@ -54,3 +54,4 @@ jobs:
                 # Deploy index.html with no-cache headers
                 aws s3 cp dist/index.html s3://${{ vars.S3_BUCKET_NAME }}/index.html \
                     --cache-control "no-cache,no-store,must-revalidate"
+                    
