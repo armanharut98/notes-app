@@ -5,6 +5,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import js from "@eslint/js";
 import { FlatCompat } from "@eslint/eslintrc";
+import vitest from '@vitest/eslint-plugin';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -24,11 +25,13 @@ export default [{
 )), {
     plugins: {
         "react-refresh": reactRefresh,
+        vitest
     },
 
     languageOptions: {
         globals: {
             ...globals.browser,
+            ...vitest.environments.env.globals
         },
 
         ecmaVersion: "latest",
@@ -59,6 +62,7 @@ export default [{
         "react/react-in-jsx-scope": "off",
         "react/prop-types": 0,
         "no-unused-vars": 0,
+        ...vitest.configs.recommended.rules
     },
-    files: ["**/*.js", "**/*.jsx"]
+    files: ["**/*.js", "**/*.jsx", "**/*.test.jsx"]
 }];

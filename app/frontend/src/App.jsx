@@ -101,7 +101,7 @@ const App = () => {
                     </Togglable> :
                     <div>
                         <p>
-                            {user.name} logged-in
+                            {user.name} logged in
                             <button onClick={logout}>logout</button>
                         </p>
                         <Togglable buttonLabel="create" ref={noteFormRef}>
@@ -111,7 +111,7 @@ const App = () => {
             }
             <div>
                 <button onClick={() => setShowAll(!showAll)}>
-                show {showAll ? "important" : "all"}
+                    show {showAll ? "important" : "all"}
                 </button>
             </div>
             <ul>

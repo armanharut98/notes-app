@@ -1,0 +1,55 @@
+name: Application Backend Build and Deploy
+
+on:
+    push:
+        branches:
+            - "dev"
+        paths:
+            - "/app/frontend/**"
+            - ".github/workflows/frontend.dev.yaml"
+
+jobs:
+    build-and-publish:
+        runs-on: ubuntu-latest
+        permissions:
+            id-token: write
+            contents: read
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v3
+
+            - name: Configure AWS Credentials
+              uses: aws-actions/configure-aws-credential@v3
+              with:
+                role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/${{ secrets.AWS_ROLE_TO_ASSUME }}
+                aws-region: ${{ vars.AWS_REGION }}
+                role-session-name: GithubActionsECRPushSession
+            
+            - name: Setup Node
+              uses: actions/setup-node@v4
+              with:
+                node-version: 20
+                cache: 'npm'
+                cache-dependency-path: ./src/app/package-lock.json
+
+            - name: Test code
+              working-directory: ./app/frontend
+              run: |
+                npm ci
+                npm test
+
+            - name: Build frontend
+              working-directory: ./app/frontend
+              run: |
+                npm run build
+
+            - name: Deploy to S3
+              run: |
+                aws s3 sync dist/ s3://${{ vars.S3_BUCKET_NAME }} \
+                    --delete \
+                    --cache-control "max-age=31536000,public" \
+                    --exclude "index.html"
+
+                # Deploy index.html with no-cache headers
+                aws s3 cp dist/index.html s3://${{ vars.S3_BUCKET_NAME }}/index.html \
+                    --cache-control "no-cache,no-store,must-revalidate"
