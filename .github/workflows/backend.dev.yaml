@@ -1,11 +1,11 @@
-name: Application Build and Deploy
+name: Application Backend Build and Deploy
 
 on:
   push:
     branches:
       - dev
     paths:
-      - 'app/**'
+      - 'app/backend/**'
       - '.github/workflows/app.dev.yaml'
 
 jobs:
