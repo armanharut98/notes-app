@@ -1,6 +1,6 @@
 const config = require("./utils/config")
 const express = require("express")
-//require("express-async-errors")
+require("express-async-errors")
 const app = express()
 const cors = require("cors")
 const mongoose = require("mongoose")
@@ -29,9 +29,18 @@ app.use(express.static("dist"))
 app.use(express.json())
 app.use(middleware.requestLogger)
 
+app.get("/api/health", (request, response) => {
+    response.status(200).end()
+})
+
 app.use("/api/login", loginRouter)
 app.use("/api/notes", notesRouter)
 app.use("/api/users", usersRouter)
+
+if (process.env.NODE_ENV === "test") {
+    const testingRouter = require("./controllers/testing")
+    app.use("/api/testing", testingRouter)
+}
 
 app.use(middleware.unknownEndpoint)
 app.use(middleware.errorHandler)

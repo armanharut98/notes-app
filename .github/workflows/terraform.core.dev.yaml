@@ -48,7 +48,6 @@ jobs:
               run: terraform init
               working-directory: ./infra/core
 
-
             - name: Verify and Prepare Terraform Workspace
               working-directory: ./infra/core
               run: |
@@ -82,10 +81,11 @@ jobs:
         permissions:
             id-token: write
             contents: read
-        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
 
+        if: github.ref == 'refs/heads/dev' && github.event_name == 'push'
         steps:
-            - name: Checkout code
+            - name: Checkout Code
+
               uses: actions/checkout@v3
 
             - name: Configure AWS credentials
