@@ -3,7 +3,7 @@ name: Application Frontend Build and Deploy
 on:
     push:
         branches:
-            - "dev"
+            - dev
         paths:
             - "/app/frontend/**"
             - ".github/workflows/frontend.dev.yaml"
