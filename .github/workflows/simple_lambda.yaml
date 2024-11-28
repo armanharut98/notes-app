@@ -16,7 +16,7 @@ jobs:
             contents: read
         steps:
             - name: Code Checkout
-              uses: actions/code-checkout@v3
+              uses: actions/checkout@v3
 
             - name: Configure AWS credentials
               uses: aws-actions/configure-aws-credentials@v3

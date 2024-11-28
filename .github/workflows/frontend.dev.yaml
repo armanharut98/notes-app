@@ -5,7 +5,7 @@ on:
         branches:
             - "dev"
         paths:
-            - "/app/frontend/**"
+            - "app/frontend/**"
             - ".github/workflows/frontend.dev.yaml"
 
 jobs:
