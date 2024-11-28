@@ -5,7 +5,8 @@ on:
         branches: 
             - 'dev'
         paths:
-            - '/lambdas/simple/**'
+            - '.github/workflows/simple_lambda.yaml'
+            - 'lambdas/simple/**'
     
 jobs:
     build-and-publish:
