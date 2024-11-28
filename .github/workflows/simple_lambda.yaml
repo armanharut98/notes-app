@@ -1,0 +1,36 @@
+name: "Simple Lambda Build and Deploy"
+
+on:
+    push:
+        branches: 
+            - dev
+        paths:
+            - '/lambdas/simple/**'
+    
+jobs:
+    build-and-publish:
+        runs-on: ubuntu-latest
+        permissions:
+            id-token: write
+            contents: read
+        steps:
+            - name: Code Checkout
+              uses: actions/code-checkout@v3
+
+            - name: Configure AWS credentials
+              uses: aws-actions/configure-aws-credentials@v3
+              with:
+                role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/${{ secrets.AWS_ROLE_TO_ASSUME }}
+                aws-region: ${{ vars.AWS_REGION }}
+                role-session-name: GithubActionsECRPushSession
+
+            - name: Create zip archive
+              working-directory: ./lambdas/simple
+              run: |
+                sudo apt install zip
+                zip -r archive.zip .
+
+            - name: Upload zip to s3
+              working-directory: ./lambdas/simple
+              run: |
+                aws s3 cp ./archive.zip s3://${{ vars.LAMBDA_BUCKET_NAME}}/archive.zip
