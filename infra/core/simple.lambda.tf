@@ -52,6 +52,7 @@ resource "aws_lambda_function" "simple_lambda" {
   s3_key           = "lambdas/simple_lambda"
   role             = aws_iam_role.lambda_exec.name
   runtime          = "nodejs16.x"
+
   handler          = "index.handler"
   source_code_hash = data.aws_s3_bucket_object.lambda_object.etag
 }
