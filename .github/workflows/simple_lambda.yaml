@@ -3,7 +3,7 @@ name: "Simple Lambda Build and Deploy"
 on:
     push:
         branches: 
-            - dev
+            - 'dev'
         paths:
             - '/lambdas/simple/**'
     
