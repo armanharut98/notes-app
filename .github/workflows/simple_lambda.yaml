@@ -35,9 +35,7 @@ jobs:
             - name: Upload zip to s3
               working-directory: ./lambdas/simple
               run: |
-                aws s3 sync ./dist/ s3://${{ vars.LAMBDA_BUCKET_NAME}}/simple_lambda.zip
-
-
+                aws s3 sync ./dist/ s3://${{ vars.LAMBDA_BUCKET_NAME}}/lambdas
 
             - name: Update AWS Lambda 
               working-directory: ./infra/core
@@ -45,5 +43,5 @@ jobs:
                 aws lambda update-function-code \
                   --function-name  simple_lambda \
                   --s3-bucket ${{ vars.LAMBDA_BUCKET_NAME}}
-                  --s3-key simple_lambda.zip
+                  --s3-key lambdas/simple_lambda.zip
 
