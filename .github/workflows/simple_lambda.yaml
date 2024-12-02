@@ -29,12 +29,13 @@ jobs:
               working-directory: ./lambdas/simple
               run: |
                 sudo apt install zip
-                zip -r simple_lambda.zip .
+                mkdir dist
+                zip -r dist/simple_lambda.zip .
 
             - name: Upload zip to s3
               working-directory: ./lambdas/simple
               run: |
-                aws s3 sync simple_lambda.zip s3://${{ vars.LAMBDA_BUCKET_NAME}}/simple_lambda.zip
+                aws s3 sync ./dist/ s3://${{ vars.LAMBDA_BUCKET_NAME}}/simple_lambda.zip
 
 
             - name: Update AWS Lambda 
