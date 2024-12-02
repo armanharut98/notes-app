@@ -38,6 +38,7 @@ jobs:
                 aws s3 sync ./dist/ s3://${{ vars.LAMBDA_BUCKET_NAME}}/simple_lambda.zip
 
 
+
             - name: Update AWS Lambda 
               working-directory: ./infra/core
               run: |
