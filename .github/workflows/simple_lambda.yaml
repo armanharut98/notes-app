@@ -29,7 +29,7 @@ jobs:
               working-directory: ./lambdas/simple
               run: |
                 sudo apt install zip
-                zip -r archive.zip .
+                zip -r simple_lambda.zip .
 
             - name: Upload zip to s3
               working-directory: ./lambdas/simple
