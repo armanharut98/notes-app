@@ -32,7 +32,7 @@ jobs:
                 mkdir dist
                 zip -r dist/simple_lambda.zip .
 
-            - name: Upload zip to s3
+            - name: Upload zip to S3
               working-directory: ./lambdas/simple
               run: |
                 aws s3 sync ./dist/ s3://${{ vars.LAMBDA_BUCKET_NAME }}/lambdas
