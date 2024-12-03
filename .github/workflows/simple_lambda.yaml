@@ -40,8 +40,5 @@ jobs:
             - name: Update AWS Lambda 
               working-directory: ./infra/core
               run: |
-                aws lambda update-function-code \
-                  --function-name  simple_lambda \
-                  --s3-bucket ${{ vars.LAMBDA_BUCKET_NAME}}
-                  --s3-key lambdas/simple_lambda.zip
+                aws lambda update-function-code --function-name  simple_lambda --s3-bucket ${{ vars.LAMBDA_BUCKET_NAME}} --s3-key lambdas/simple_lambda.zip
 
