@@ -32,10 +32,10 @@ resource "aws_security_group" "alb" {
 }
 
 resource "aws_lb" "app" {
-  name                       = "${local.core_name_prefix}-app-alb"
-  load_balancer_type         = "application"
-  security_groups            = [aws_security_group.alb.id]
-  subnets                    = aws_subnet.core_public[*].id
+  name               = "${local.core_name_prefix}-app-alb"
+  load_balancer_type = "application"
+  security_groups    = [aws_security_group.alb.id]
+  subnets            = aws_subnet.core_public[*].id
 
   enable_deletion_protection = false
   enable_http2               = true
