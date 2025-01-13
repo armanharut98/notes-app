@@ -54,4 +54,5 @@ resource "aws_lambda_function" "simple_lambda" {
   runtime          = "nodejs16.x"
   handler          = "index.handler"
   source_code_hash = data.aws_s3_object.lambda_object.etag
+
 }
